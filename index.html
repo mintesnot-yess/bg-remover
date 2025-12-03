@@ -1,0 +1,705 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Smart Background Remover</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+  :root {
+    --primary: #6366f1;
+    --primary-dark: #4f46e5;
+    --success: #10b981;
+    --success-dark: #059669;
+    --warning: #f59e0b;
+    --warning-dark: #d97706;
+    --gray: #6b7280;
+    --gray-dark: #4b5563;
+    --light: #f8fafc;
+    --white: #ffffff;
+    --shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.1);
+    --radius: 16px;
+    --radius-sm: 12px;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(135deg, #f0f4ff 0%, #fdf2ff 100%);
+    color: #1f2937;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .card {
+    background: var(--white);
+    padding: 40px;
+    border-radius: 24px;
+    box-shadow: var(--shadow-lg);
+    width: 100%;
+    max-width: 900px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary), var(--success));
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+
+  h1 {
+    margin: 0 0 12px;
+    font-size: 32px;
+    font-weight: 700;
+    background: linear-gradient(90deg, var(--primary), var(--success));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.5px;
+  }
+
+  .subtitle {
+    margin: 0;
+    color: var(--gray);
+    font-size: 16px;
+    line-height: 1.5;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .dropzone {
+    position: relative;
+    border: 2px dashed #e5e7eb;
+    border-radius: var(--radius);
+    padding: 48px 32px;
+    background: var(--light);
+    cursor: pointer;
+    transition: var(--transition);
+    margin: 0 auto 32px;
+    text-align: center;
+    max-width: 600px;
+  }
+
+  .dropzone:hover {
+    border-color: var(--primary);
+    background: #f5f7ff;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+  }
+
+  .dropzone:hover .upload-icon {
+    transform: scale(1.1);
+  }
+
+  .upload-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 20px;
+    background: linear-gradient(135deg, var(--primary), var(--success));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+  }
+
+  .upload-icon svg {
+    width: 32px;
+    height: 32px;
+    fill: var(--white);
+  }
+
+  .drop-text {
+    pointer-events: none;
+    font-size: 18px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 8px;
+  }
+
+  .drop-hint {
+    pointer-events: none;
+    font-size: 14px;
+    color: var(--gray);
+  }
+
+  .dropzone input {
+    position: absolute;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    cursor: pointer;
+  }
+
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 32px;
+  }
+
+  button {
+    padding: 14px 28px;
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    letter-spacing: -0.2px;
+    min-width: 160px;
+  }
+
+  button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
+  }
+
+  button:not(:disabled):hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: var(--white);
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    background: linear-gradient(135deg, var(--primary-dark), #4338ca);
+  }
+
+  .btn-success {
+    background: linear-gradient(135deg, var(--success), var(--success-dark));
+    color: var(--white);
+  }
+
+  .btn-success:hover:not(:disabled) {
+    background: linear-gradient(135deg, var(--success-dark), #047857);
+  }
+
+  .btn-warning {
+    background: linear-gradient(135deg, var(--warning), var(--warning-dark));
+    color: var(--white);
+  }
+
+  .btn-warning:hover:not(:disabled) {
+    background: linear-gradient(135deg, var(--warning-dark), #b45309);
+  }
+
+  .btn-secondary {
+    background: linear-gradient(135deg, var(--gray), var(--gray-dark));
+    color: var(--white);
+  }
+
+  .btn-secondary:hover:not(:disabled) {
+    background: linear-gradient(135deg, var(--gray-dark), #374151);
+  }
+
+  .status-container {
+    background: var(--light);
+    border-radius: var(--radius-sm);
+    padding: 18px;
+    margin-bottom: 32px;
+    text-align: center;
+  }
+
+  .status {
+    font-size: 16px;
+    font-weight: 600;
+    color: #374151;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .status::before {
+    content: '';
+    width: 10px;
+    height: 10px;
+    background: var(--success);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  .preview-container {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    margin-top: 32px;
+  }
+
+  @media (min-width: 768px) {
+    .preview-container {
+      flex-direction: row;
+    }
+  }
+
+  .preview-box {
+    background: var(--light);
+    border-radius: var(--radius);
+    padding: 24px;
+    text-align: center;
+    flex: 1;
+    min-height: 300px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .preview-label {
+    display: block;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--gray);
+    margin-bottom: 16px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #e5e7eb;
+  }
+
+  .preview-content {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 250px;
+    overflow: hidden;
+    border-radius: 12px;
+    background: repeating-conic-gradient(#f8fafc 0% 25%, #ffffff 0% 50%) 
+                50% / 20px 20px;
+  }
+
+  img, canvas {
+    max-width: 100%;
+    max-height: 300px;
+    width: auto;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    display: block;
+    object-fit: contain;
+  }
+
+  .hidden {
+    display: none;
+  }
+
+  .preview-placeholder {
+    color: var(--gray);
+    font-size: 14px;
+    padding: 20px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+  }
+
+  .footer {
+    margin-top: 32px;
+    text-align: center;
+    font-size: 14px;
+    color: var(--gray);
+  }
+
+  .loader {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid var(--primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+</style>
+  </head>
+  <body>
+
+    <div class="card">
+      <div class="header">
+        <h1>Smart Background Remover</h1>
+        <p class="subtitle">Remove backgrounds with AI precision. Supports PNG,
+          WebP, and JPG formats with customizable backgrounds.</p>
+      </div>
+
+      <div class="dropzone" id="dropzone">
+        <div class="upload-icon">
+          <svg viewBox="0 0 24 24">
+            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+          </svg>
+        </div>
+        <div class="drop-text">Drag & drop your image here</div>
+        <div class="drop-hint">or click to browse files (JPG, PNG, WebP)</div>
+        <input type="file" id="upload" accept="image/*">
+      </div>
+
+      <div class="status-container">
+        <p class="status" id="status">Ready to remove backgrounds</p>
+      </div>
+
+      <div class="controls">
+        <button id="go" class="btn-primary" disabled>
+          <span>Remove Background</span>
+        </button>
+        <button id="toggle" class="btn-warning hidden">
+          <span>Keep Background</span>
+        </button>
+        <button id="format" class="btn-secondary hidden">
+          <span>Save as JPG</span>
+        </button>
+        <button id="download" class="btn-success hidden">
+          <span>Download Image</span>
+        </button>
+      </div>
+
+      <div class="preview-container">
+        <div class="preview-box">
+          <span class="preview-label">Original Image</span>
+          <div class="preview-content">
+            <img id="orig" class="hidden">
+            <div id="orig-placeholder" class="preview-placeholder">Original
+              image will appear here</div>
+          </div>
+        </div>
+        <div class="preview-box">
+          <span class="preview-label">Result</span>
+          <div class="preview-content">
+            <canvas id="out" class="hidden"></canvas>
+            <div id="out-placeholder" class="preview-placeholder">Processed
+              result will appear here</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer">
+        <p>AI-powered background removal • Fast processing • High quality
+          results</p>
+      </div>
+    </div>
+
+    <script type="module">
+  import { FilesetResolver, ImageSegmenter } from 
+    "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs";
+
+  const status = document.getElementById('status');
+  const go = document.getElementById('go');
+  const dl = document.getElementById('download');
+  const toggleBtn = document.getElementById('toggle');
+  const formatBtn = document.getElementById('format');
+  const dropzone = document.getElementById('dropzone');
+  const uploadInput = document.getElementById('upload');
+  const img = document.getElementById('orig');
+  const canvas = document.getElementById('out');
+  const ctx = canvas.getContext('2d');
+  const origPlaceholder = document.getElementById('orig-placeholder');
+  const outPlaceholder = document.getElementById('out-placeholder');
+  let segmenter = null;
+  let keepForeground = true; // true = keep person, false = keep background
+  let currentFormat = 'png'; // png, webp, jpg
+
+  async function init() {
+    try {
+      status.innerHTML = '<span class="loader"></span> Loading AI model...';
+      const vision = await FilesetResolver.forVisionTasks(
+        "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm"
+      );
+      segmenter = await ImageSegmenter.createFromOptions(vision, {
+        baseOptions: {
+          modelAssetPath: "https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_segmenter/float16/latest/selfie_segmenter.tflite"
+        },
+        runningMode: "IMAGE",
+        outputCategoryMask: true,
+        outputType: "CATEGORY_MASK"
+      });
+      status.textContent = "Ready — upload an image to begin";
+      go.disabled = false;
+    } catch (e) {
+      console.error("Failed to load model:", e);
+      status.textContent = "Error loading model. Check console.";
+    }
+  }
+
+  // Drag & Drop Support
+  dropzone.addEventListener('dragover', e => {
+    e.preventDefault();
+    dropzone.style.background = '#f5f7ff';
+    dropzone.style.borderColor = 'var(--primary)';
+  });
+
+  dropzone.addEventListener('dragleave', () => {
+    dropzone.style.background = 'var(--light)';
+    dropzone.style.borderColor = '#e5e7eb';
+  });
+
+  dropzone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropzone.style.background = 'var(--light)';
+    dropzone.style.borderColor = '#e5e7eb';
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      handleFile(files[0]);
+    }
+  });
+
+  uploadInput.onchange = e => {
+    if (e.target.files.length > 0) {
+      handleFile(e.target.files[0]);
+    }
+  };
+
+  function handleFile(file) {
+    if (!file.type.startsWith('image/')) return;
+    
+    // Update dropzone appearance
+    dropzone.style.background = '#e8f5e9';
+    dropzone.style.borderColor = 'var(--success)';
+    dropzone.querySelector('.upload-icon').style.background = 'linear-gradient(135deg, var(--success), var(--success-dark))';
+    dropzone.querySelector('.drop-text').textContent = 'Image selected!';
+    dropzone.querySelector('.drop-hint').textContent = file.name;
+    
+    img.src = URL.createObjectURL(file);
+    img.onload = () => {
+      // Auto-resize large images for display
+      const MAX_DISPLAY_WIDTH = 400;
+      let width = img.naturalWidth;
+      let height = img.naturalHeight;
+
+      if (width > MAX_DISPLAY_WIDTH) {
+        height = Math.round(height * (MAX_DISPLAY_WIDTH / width));
+        width = MAX_DISPLAY_WIDTH;
+      }
+
+      img.style.width = width + 'px';
+      img.style.height = height + 'px';
+      
+      // Show image and hide placeholder
+      img.classList.remove('hidden');
+      origPlaceholder.style.display = 'none';
+      
+      canvas.classList.add('hidden');
+      outPlaceholder.style.display = 'flex';
+      
+      dl.classList.add('hidden');
+      toggleBtn.classList.add('hidden');
+      formatBtn.classList.add('hidden');
+      
+      status.textContent = "Click Remove Background to process";
+      go.disabled = false;
+      go.innerHTML = '<span>Remove Background</span>';
+    };
+  }
+
+  go.onclick = async () => {
+    if (!segmenter) return;
+    
+    go.disabled = true;
+    go.innerHTML = '<span class="loader"></span> Processing...';
+    status.innerHTML = '<span class="loader"></span> Removing background...';
+
+    try {
+      const result = await segmenter.segment(img);
+      const mask = result.categoryMask;
+
+      let maskData;
+      if (mask.getBuffer) {
+        maskData = new Uint8Array(mask.getBuffer());
+      } else if (mask.getAsFloat32Array) {
+        const floatData = await mask.getAsFloat32Array();
+        maskData = new Uint8Array(floatData.length);
+        for (let i = 0; i < floatData.length; i++) {
+          maskData[i] = Math.round(floatData[i] * 255);
+        }
+      } else {
+        throw new Error("Unsupported mask type");
+      }
+
+      // Use original dimensions for processing
+      const origWidth = img.naturalWidth;
+      const origHeight = img.naturalHeight;
+
+      canvas.width = origWidth;
+      canvas.height = origHeight;
+      
+      // Calculate display size for canvas (same as image)
+      const MAX_DISPLAY_WIDTH = 400;
+      let displayWidth = origWidth;
+      let displayHeight = origHeight;
+
+      if (displayWidth > MAX_DISPLAY_WIDTH) {
+        displayHeight = Math.round(displayHeight * (MAX_DISPLAY_WIDTH / displayWidth));
+        displayWidth = MAX_DISPLAY_WIDTH;
+      }
+
+      canvas.style.width = displayWidth + 'px';
+      canvas.style.height = displayHeight + 'px';
+
+      // Show canvas and hide placeholder
+      canvas.classList.remove('hidden');
+      outPlaceholder.style.display = 'none';
+
+      // Step 1: Draw original image onto main canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+      // Step 2: Create temp canvas for blurred mask
+      const tempCanvas = document.createElement('canvas');
+      const tempCtx = tempCanvas.getContext('2d');
+      tempCanvas.width = canvas.width;
+      tempCanvas.height = canvas.height;
+
+      // Step 3: Draw mask as grayscale
+      const maskImageData = tempCtx.createImageData(canvas.width, canvas.height);
+      for (let i = 0; i < maskData.length; i++) {
+        maskImageData.data[i * 4 + 0] = maskData[i]; // R
+        maskImageData.data[i * 4 + 1] = maskData[i]; // G
+        maskImageData.data[i * 4 + 2] = maskData[i]; // B
+        maskImageData.data[i * 4 + 3] = 255;         // A
+      }
+      tempCtx.putImageData(maskImageData, 0, 0);
+
+      // Step 4: Apply Gaussian blur for edge feathering
+      tempCtx.filter = 'blur(3px)';
+      tempCtx.drawImage(tempCanvas, 0, 0);
+
+      // Step 5: Get blurred mask data
+      const blurredMaskData = tempCtx.getImageData(0, 0, canvas.width, canvas.height).data;
+
+      // Step 6: Apply blurred mask to alpha channel
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      for (let i = 0; i < maskData.length; i++) {
+        const alpha = blurredMaskData[i * 4];
+        imageData.data[i * 4 + 3] = keepForeground ? alpha : 255 - alpha;
+      }
+
+      ctx.putImageData(imageData, 0, 0);
+
+      status.textContent = "Background removed successfully!";
+      dl.classList.remove('hidden');
+      toggleBtn.classList.remove('hidden');
+      formatBtn.classList.remove('hidden');
+      formatBtn.textContent = currentFormat === 'jpg' ? 'Save as JPG' : 
+                             currentFormat === 'webp' ? 'Save as WebP' : 'Save as PNG';
+
+    } catch (e) {
+      console.error("Processing error:", e);
+      status.textContent = "Error processing image. Please try another.";
+    } finally {
+      go.innerHTML = '<span>Remove Background</span>';
+      go.disabled = false;
+    }
+  };
+
+  toggleBtn.onclick = () => {
+    keepForeground = !keepForeground;
+    toggleBtn.innerHTML = keepForeground ? '<span>Keep Background</span>' : '<span>Keep Person</span>';
+    if (!canvas.classList.contains('hidden')) {
+      go.onclick();
+    }
+  };
+
+  formatBtn.onclick = () => {
+    if (currentFormat === 'png') {
+      currentFormat = 'jpg';
+      formatBtn.innerHTML = '<span>Save as JPG</span>';
+    } else if (currentFormat === 'jpg') {
+      currentFormat = 'webp';
+      formatBtn.innerHTML = '<span>Save as WebP</span>';
+    } else {
+      currentFormat = 'png';
+      formatBtn.innerHTML = '<span>Save as PNG</span>';
+    }
+  };
+
+  dl.onclick = () => {
+    let filename = 'transparent.png';
+    let mimeType = 'image/png';
+
+    if (currentFormat === 'jpg') {
+      filename = 'background-removed.jpg';
+      mimeType = 'image/jpeg';
+    } else if (currentFormat === 'webp') {
+      filename = 'background-removed.webp';
+      mimeType = 'image/webp';
+    }
+
+    // If saving as JPG/WebP, fill background
+    if (currentFormat !== 'png') {
+      const bgCanvas = document.createElement('canvas');
+      const bgCtx = bgCanvas.getContext('2d');
+      bgCanvas.width = canvas.width;
+      bgCanvas.height = canvas.height;
+
+      // Fill with white background (you can change this color)
+      bgCtx.fillStyle = '#ffffff';
+      bgCtx.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
+
+      // Draw transparent image over it
+      bgCtx.drawImage(canvas, 0, 0);
+
+      // Convert to desired format
+      bgCanvas.toBlob(blob => {
+        if (blob) {
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = filename;
+          a.click();
+          URL.revokeObjectURL(a.href);
+        }
+      }, mimeType, 0.9); // quality 0.9 for JPG/WebP
+
+    } else {
+      // Save as PNG (transparent)
+      canvas.toBlob(blob => {
+        if (blob) {
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = filename;
+          a.click();
+          URL.revokeObjectURL(a.href);
+        }
+      }, 'image/png');
+    }
+  };
+
+  init();
+</script>
+  </body>
+</html>
